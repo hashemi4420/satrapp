@@ -1,0 +1,144 @@
+/*div.dropdown-menu{*/
+/*    transform: translate3d(0px, -156px, 0px) !important;*/
+/*}*/
+.dropdown-toggle::after{
+    display: none !important;
+}
+
+div.bootstrap-select{
+    border-radius: .25rem !important;
+    background-color: #fdfdff !important;
+    border: 1px solid #08d46d !important;
+    padding: 5px 15px !important;
+}
+
+.dark div.bootstrap-select{
+    color: #96a2b4 !important;
+    background-color: #353c48 !important;
+    border-radius: .25rem !important;
+    border: 1px solid #09d16e !important;
+    padding: 5px 15px !important;
+}
+
+.dark.bootstrap-select.btn-group .dropdown-toggle .filter-option{
+    color: #ffffff;
+}
+
+.dark span.text{
+    color: #ffffff;
+}
+
+span.filter-option .pull-right{
+    font-weight: 400 !important;
+    font-size: 14px !important;
+}
+
+button.dropdown-toggle>span.filter-option{
+    font-weight: 400 !important;
+    font-size: 14px !important;
+    float: right !important;
+}
+
+.dropdown-menu-right{
+    left: 0 !important;
+    right: auto !important;
+}
+
+button.btn-primary{
+    height: 42px !important;
+}
+
+button.btn-outline-primary{
+    height: 42px !important;
+}
+
+button.btn-danger{
+    height: 42px !important;
+}
+
+button.btn-outline-danger{
+    height: 42px !important;
+}
+
+button.btn-success{
+    height: 42px !important;
+}
+
+button.btn-outline-success{
+    height: 42px !important;
+}
+
+button.btn-info{
+    height: 42px !important;
+}
+
+button.btn-outline-info{
+    height: 42px !important;
+}
+
+button.btn-secondary{
+    box-shadow: 0 2px 6px #b39e0a !important;
+    background-color: #c3ad0e !important;
+    border-color: #dac218 !important;
+    height: 42px !important;
+}
+
+button.btn-outline-secondary{
+    height: 42px !important;
+}
+
+button.btn-warning{
+    height: 42px !important;
+}
+
+button.btn-outline-warning{
+    height: 42px !important;
+}
+
+.logo img {
+    width: 100px;
+    border-radius: 20%;
+}
+
+#mobileShow{
+    display: block;
+}
+
+@media screen and (max-width: 500px){
+    #mobileShow{
+        display: none;
+    }
+}
+
+.navbar-nav{
+    margin: 9px 0 !important;
+}
+
+.rollButton{
+    margin-top: 10px;
+    background-color: #08d06d;
+    color: black;
+    border-radius: 14px;
+}
+
+.dark .rollButton{
+    margin-top: 10px;
+    background-color: #08d06d;
+    color: white;
+    border-radius: 14px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button
+{
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number]{
+    -moz-appearance: textfield;
+}
+
+input[type=tel]{
+    -moz-appearance: textfield;
+}

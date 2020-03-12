@@ -1,0 +1,16 @@
+﻿@font-face {
+	font-family: sans;
+	src: url('../fonts/sans.eot');
+	src: url('../fonts/sansd41d.eot?#iefix') format('embedded-opentype'),  /* IE6-8 */
+		 url('../fonts/sans.woff2') format('woff2'),  /* FF39+,Chrome36+, Opera24+*/
+		 url('../fonts/sans.woff') format('woff'),  /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+		 url('../fonts/sans.ttf') format('truetype');
+}
+@font-face {
+	font-family: persian;
+	src: url('../fonts/sansfa.eot');
+	src: url('../fonts/sansfad41d.eot?#iefix') format('embedded-opentype'),  /* IE6-8 */
+	url('../fonts/sansfa.woff2') format('woff2'),  /* FF39+,Chrome36+, Opera24+*/
+	url('../fonts/sansfa.woff') format('woff'),  /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+	url('../fonts/sansfa.ttf') format('truetype');
+}

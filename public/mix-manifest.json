@@ -1,0 +1,10 @@
+{
+    "/js/app.js": "/js/app.js",
+    "/css/app.css": "/css/app.css",
+    "/js/core/app.js": "/js/core/app.js",
+    "/js/core/libraries/bootstrap.js": "/js/core/libraries/bootstrap.js",
+    "/js/core/libraries/jquery.js": "/js/core/libraries/jquery.js",
+    "/js/pages/login.js": "/js/pages/login.js",
+    "/js/plugins/forms/styling/uniform.js": "/js/plugins/forms/styling/uniform.js",
+    "/js/plugins/loaders/blockui.js": "/js/plugins/loaders/blockui.js"
+}
