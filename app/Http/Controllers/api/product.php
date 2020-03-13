@@ -1154,7 +1154,8 @@ WHERE signs.customer_id = '".$request->customer_id."' ".$where." GROUP BY signs.
         }
 
 
-            $data = DB::select(DB::raw("SELECT
+            $data = DB::select(DB::raw("SELECT * FROM (
+SELECT
 	IF(IFNULL(article_creators.area_id,'') <> '', COUNT(DISTINCT article_providers.id), NULL) AS tedad,
 	IF(IFNULL(article_creators.area_id,'') <> '', article_creators.area_id, NULL) AS id,
 	IF(IFNULL(article_creators.area_id,'') <> '', article_areas.title, NULL) AS title,
@@ -1212,7 +1213,9 @@ SELECT
 	IF(IFNULL(service_creators.id,'') <> '', 1, NULL) AS serviceBrand
 FROM service_creators
 INNER JOIN service_brands ON service_brands.id = service_creators.brand_id
-WHERE UPPER(service_creators.title) LIKE '%".strtoupper($request->title)."%'"));
+WHERE UPPER(service_creators.title) LIKE '%".strtoupper($request->title)."%'
+) AS result
+WHERE result.tedad IS NOT NULL"));
 
         $response = [
             'success' => true,
@@ -1299,13 +1302,16 @@ GROUP BY service_creators.id"));
 
     public function searchResultArticleBrand(Request $request){
         $data = DB::select(DB::raw("SELECT
-	article_brands.id AS id,
-	article_brands.title AS title,
-	article_brands.url_avatar AS avatar
+	article_brands.id AS idBrand,
+	article_brands.title AS titleBrand,
+	article_brands.url_avatar AS avatarBrand,
+	
+	article_creators.id AS id,
+	article_creators.title AS title,
+	article_creators.url_avatar AS avatar
 FROM article_brands
 INNER JOIN article_creators ON article_creators.brand_id = article_brands.id
-WHERE UPPER(article_creators.title) LIKE '%".strtoupper($request->title)."%' 
-GROUP BY article_brands.id"));
+WHERE UPPER(article_creators.title) LIKE '%".strtoupper($request->title)."%'"));
 
         $response = [
             'success' => true,
@@ -1318,13 +1324,16 @@ GROUP BY article_brands.id"));
 
     public function searchResultServiceBrand(Request $request){
         $data = DB::select(DB::raw("SELECT
-	service_brands.id AS id,
-	service_brands.title AS title,
-	service_brands.url_avatar AS avatar
+	service_brands.id AS idBrand,
+	service_brands.title AS titleBrand,
+	service_brands.url_avatar AS avatarBrand,
+	
+	service_creators.id AS id,
+	service_creators.title AS title,
+	service_creators.url_avatar AS avatar
 FROM service_brands
 INNER JOIN service_creators ON service_creators.brand_id = service_brands.id
-WHERE UPPER(service_creators.title) LIKE '%".strtoupper($request->title)."%' 
-GROUP BY service_brands.id"));
+WHERE UPPER(service_creators.title) LIKE '%".strtoupper($request->title)."%'"));
 
         $response = [
             'success' => true,
