@@ -55,6 +55,8 @@ Route::GET('search', 'api\product@search');
 
 Route::GET('searchResultArticle', 'api\product@searchResultArticle');
 Route::GET('searchResultService', 'api\product@searchResultService');
+Route::GET('searchResultArticleBrand', 'api\product@searchResultArticleBrand');
+Route::GET('searchResultServiceBrand', 'api\product@searchResultServiceBrand');
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();

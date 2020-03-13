@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class product extends Controller
 {
-        public function home(Request $request)
+    public function home(Request $request)
     {
         $where = "WHERE 1 = 1";
         if($request->state != null && $request->state != ""){
@@ -1155,34 +1155,64 @@ WHERE signs.customer_id = '".$request->customer_id."' ".$where." GROUP BY signs.
 
 
             $data = DB::select(DB::raw("SELECT
-	COUNT(article_providers.id) AS tedad,
-	article_creators.area_id AS id,
-	article_areas.title AS title,
-	1 AS article,
-	0 AS service
+	IF(IFNULL(article_creators.area_id,'') <> '', COUNT(DISTINCT article_providers.id), NULL) AS tedad,
+	IF(IFNULL(article_creators.area_id,'') <> '', article_creators.area_id, NULL) AS id,
+	IF(IFNULL(article_creators.area_id,'') <> '', article_areas.title, NULL) AS title,
+	IF(IFNULL(article_creators.area_id,'') <> '', 1, NULL) AS article,
+	IF(IFNULL(article_creators.area_id,'') <> '', 0, NULL) AS service,
+	IF(IFNULL(article_creators.area_id,'') <> '', 0, NULL) AS articleBrand,
+	IF(IFNULL(article_creators.area_id,'') <> '', 0, NULL) AS serviceBrand
 FROM article_providers
 INNER JOIN article_creators ON article_creators.id = article_providers.article_id
 INNER JOIN article_areas ON article_areas.id = article_creators.area_id
-INNER JOIN users ON article_providers.user_id = users.id
-INNER JOIN locations ON users.id = locations.user_id
-WHERE article_creators.title LIKE '%".$request->title."%' ".$where."
+LEFT JOIN locations ON article_providers.user_id = locations.user_id
+WHERE UPPER(article_creators.title) LIKE '%".strtoupper($request->title)."%' AND article_providers.active = 1 ".$where."
 GROUP BY article_creators.area_id
 
 UNION
 
 SELECT
-	COUNT(service_providers.id) AS tedad,
-	service_creators.area_id AS id,
-	service_areas.title AS title,
-	0 AS article,
-	1 AS service
+	IF(IFNULL(service_creators.area_id,'') <> '', COUNT(DISTINCT service_providers.id), NULL) AS tedad,
+	IF(IFNULL(service_creators.area_id,'') <> '', service_creators.area_id, NULL) AS id,
+	IF(IFNULL(service_creators.area_id,'') <> '', service_areas.title, NULL) AS title,
+	IF(IFNULL(service_creators.area_id,'') <> '', 0, NULL) AS article,
+	IF(IFNULL(service_creators.area_id,'') <> '', 1, NULL) AS service,
+	IF(IFNULL(service_creators.area_id,'') <> '', 0, NULL) AS articleBrand,
+	IF(IFNULL(service_creators.area_id,'') <> '', 0, NULL) AS serviceBrand
 FROM service_providers
 INNER JOIN service_creators ON service_creators.id = service_providers.service_id
 INNER JOIN service_areas ON service_areas.id = service_creators.area_id
-INNER JOIN users ON service_providers.user_id = users.id
-INNER JOIN locations ON users.id = locations.user_id
-WHERE service_creators.title LIKE '%".$request->title."%' ".$where."
-GROUP BY service_creators.area_id"));
+LEFT JOIN locations ON service_providers.user_id = locations.user_id
+WHERE UPPER(service_creators.title) LIKE '%".strtoupper($request->title)."%' AND service_providers.active = 1 ".$where."
+GROUP BY service_creators.area_id
+
+UNION
+
+SELECT
+	IF(IFNULL(article_creators.id,'') <> '', COUNT(DISTINCT article_creators.brand_id), NULL) AS tedad,
+	IF(IFNULL(article_creators.id,'') <> '', NULL, NULL) AS id,
+	IF(IFNULL(article_creators.id,'') <> '', 'برند محصولات', NULL) AS title,
+	IF(IFNULL(article_creators.id,'') <> '', 0, NULL) AS article,
+	IF(IFNULL(article_creators.id,'') <> '', 0, NULL) AS service,
+	IF(IFNULL(article_creators.id,'') <> '', 1, NULL) AS articleBrand,
+	IF(IFNULL(article_creators.id,'') <> '', 0, NULL) AS serviceBrand
+FROM article_creators
+INNER JOIN article_brands ON article_brands.id = article_creators.brand_id
+WHERE UPPER(article_creators.title) LIKE '%".strtoupper($request->title)."%'
+
+UNION
+
+SELECT
+	IF(IFNULL(service_creators.id,'') <> '', COUNT(DISTINCT service_creators.brand_id), NULL) AS tedad,
+	IF(IFNULL(service_creators.id,'') <> '', NULL, NULL) AS id,
+	IF(IFNULL(service_creators.id,'') <> '', 'ببرند خدمات', NULL) AS title,
+	IF(IFNULL(service_creators.id,'') <> '', 0, NULL) AS article,
+	IF(IFNULL(service_creators.id,'') <> '', 0, NULL) AS service,
+	IF(IFNULL(service_creators.id,'') <> '', 0, NULL) AS articleBrand,
+	IF(IFNULL(service_creators.id,'') <> '', 1, NULL) AS serviceBrand
+FROM service_creators
+INNER JOIN service_brands ON service_brands.id = service_creators.brand_id
+WHERE UPPER(service_creators.title) LIKE '%".strtoupper($request->title)."%'"));
 
         $response = [
             'success' => true,
@@ -1194,6 +1224,17 @@ GROUP BY service_creators.area_id"));
     }
 
     public function searchResultArticle(Request $request){
+        $where = "";
+        if($request->state != null && $request->state != ""){
+            $where = " AND locations.state_id = ".$request->state;
+        }
+        if($request->city != null && $request->city != ""){
+            $where = " AND locations.city_id = ".$request->city;
+        }
+        if($request->district != null && $request->district != "") {
+            $where = " AND locations.district_id = " . $request->district;
+        }
+
         $data = DB::select(DB::raw("SELECT
 	article_creators.id AS id,
 	article_creators.title AS title,
@@ -1204,7 +1245,11 @@ FROM article_providers
 INNER JOIN users ON users.id = article_providers.user_id
 INNER JOIN article_creators ON article_creators.id = article_providers.article_id
 INNER JOIN article_areas ON article_areas.id = article_creators.area_id
-WHERE article_creators.title LIKE '%".$request->title."%' AND article_creators.area_id = ".$request->areaId));
+LEFT JOIN locations ON users.id = locations.user_id
+WHERE UPPER(article_creators.title) LIKE '%".strtoupper($request->title)."%' 
+        AND article_creators.area_id = ".$request->areaId." 
+        AND article_providers.active = 1 AND users.active = 1 ".$where."
+GROUP BY article_creators.id"));
 
         $response = [
             'success' => true,
@@ -1216,6 +1261,17 @@ WHERE article_creators.title LIKE '%".$request->title."%' AND article_creators.a
     }
 
     public function searchResultService(Request $request){
+        $where = "";
+        if($request->state != null && $request->state != ""){
+            $where = " AND locations.state_id = ".$request->state;
+        }
+        if($request->city != null && $request->city != ""){
+            $where = " AND locations.city_id = ".$request->city;
+        }
+        if($request->district != null && $request->district != "") {
+            $where = " AND locations.district_id = " . $request->district;
+        }
+
         $data = DB::select(DB::raw("SELECT
 	service_creators.id AS id,
 	service_creators.title AS title,
@@ -1226,7 +1282,49 @@ FROM service_providers
 INNER JOIN users ON users.id = service_providers.user_id
 INNER JOIN service_creators ON service_creators.id = service_providers.service_id
 INNER JOIN service_areas ON service_areas.id = service_creators.area_id
-WHERE service_creators.title LIKE '%".$request->title."%' AND service_creators.area_id = ".$request->areaId));
+LEFT JOIN locations ON users.id = locations.user_id
+WHERE UPPER(service_creators.title) LIKE '%".strtoupper($request->title)."%' 
+        AND service_creators.area_id = ".$request->areaId." 
+        AND service_providers.active = 1 AND users.active = 1 ".$where."
+GROUP BY service_creators.id"));
+
+        $response = [
+            'success' => true,
+            'data' => $data,
+            'message' => 'successfully.'
+        ];
+
+        return response()->json($response, 200);
+    }
+
+    public function searchResultArticleBrand(Request $request){
+        $data = DB::select(DB::raw("SELECT
+	article_brands.id AS id,
+	article_brands.title AS title,
+	article_brands.url_avatar AS avatar
+FROM article_brands
+INNER JOIN article_creators ON article_creators.brand_id = article_brands.id
+WHERE UPPER(article_creators.title) LIKE '%".strtoupper($request->title)."%' 
+GROUP BY article_brands.id"));
+
+        $response = [
+            'success' => true,
+            'data' => $data,
+            'message' => 'successfully.'
+        ];
+
+        return response()->json($response, 200);
+    }
+
+    public function searchResultServiceBrand(Request $request){
+        $data = DB::select(DB::raw("SELECT
+	service_brands.id AS id,
+	service_brands.title AS title,
+	service_brands.url_avatar AS avatar
+FROM service_brands
+INNER JOIN service_creators ON service_creators.brand_id = service_brands.id
+WHERE UPPER(service_creators.title) LIKE '%".strtoupper($request->title)."%' 
+GROUP BY service_brands.id"));
 
         $response = [
             'success' => true,
