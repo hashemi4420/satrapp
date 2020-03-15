@@ -1162,7 +1162,9 @@ SELECT
 	IF(IFNULL(article_creators.area_id,'') <> '', 1, NULL) AS article,
 	IF(IFNULL(article_creators.area_id,'') <> '', 0, NULL) AS service,
 	IF(IFNULL(article_creators.area_id,'') <> '', 0, NULL) AS articleBrand,
-	IF(IFNULL(article_creators.area_id,'') <> '', 0, NULL) AS serviceBrand
+	IF(IFNULL(article_creators.area_id,'') <> '', 0, NULL) AS serviceBrand,
+	IF(IFNULL(article_creators.area_id,'') <> '', 0, NULL) AS brand,
+	IF(IFNULL(article_creators.area_id,'') <> '', 0, NULL) AS reseller
 FROM article_providers
 INNER JOIN article_creators ON article_creators.id = article_providers.article_id
 INNER JOIN article_areas ON article_areas.id = article_creators.area_id
@@ -1179,7 +1181,9 @@ SELECT
 	IF(IFNULL(service_creators.area_id,'') <> '', 0, NULL) AS article,
 	IF(IFNULL(service_creators.area_id,'') <> '', 1, NULL) AS service,
 	IF(IFNULL(service_creators.area_id,'') <> '', 0, NULL) AS articleBrand,
-	IF(IFNULL(service_creators.area_id,'') <> '', 0, NULL) AS serviceBrand
+	IF(IFNULL(service_creators.area_id,'') <> '', 0, NULL) AS serviceBrand,
+	IF(IFNULL(service_creators.area_id,'') <> '', 0, NULL) AS brand,
+	IF(IFNULL(service_creators.area_id,'') <> '', 0, NULL) AS reseller
 FROM service_providers
 INNER JOIN service_creators ON service_creators.id = service_providers.service_id
 INNER JOIN service_areas ON service_areas.id = service_creators.area_id
@@ -1190,13 +1194,15 @@ GROUP BY service_creators.area_id
 UNION
 
 SELECT
-	IF(IFNULL(article_creators.id,'') <> '', COUNT(DISTINCT article_creators.brand_id), NULL) AS tedad,
+	IF(IFNULL(article_creators.id,'') <> '', COUNT(DISTINCT article_creators.id), NULL) AS tedad,
 	IF(IFNULL(article_creators.id,'') <> '', NULL, NULL) AS id,
 	IF(IFNULL(article_creators.id,'') <> '', 'برند محصولات', NULL) AS title,
 	IF(IFNULL(article_creators.id,'') <> '', 0, NULL) AS article,
 	IF(IFNULL(article_creators.id,'') <> '', 0, NULL) AS service,
 	IF(IFNULL(article_creators.id,'') <> '', 1, NULL) AS articleBrand,
-	IF(IFNULL(article_creators.id,'') <> '', 0, NULL) AS serviceBrand
+	IF(IFNULL(article_creators.id,'') <> '', 0, NULL) AS serviceBrand,
+	IF(IFNULL(article_creators.id,'') <> '', 0, NULL) AS brand,
+	IF(IFNULL(article_creators.id,'') <> '', 0, NULL) AS reseller
 FROM article_creators
 INNER JOIN article_brands ON article_brands.id = article_creators.brand_id
 WHERE UPPER(article_creators.title) LIKE '%".strtoupper($request->title)."%'
@@ -1204,16 +1210,91 @@ WHERE UPPER(article_creators.title) LIKE '%".strtoupper($request->title)."%'
 UNION
 
 SELECT
-	IF(IFNULL(service_creators.id,'') <> '', COUNT(DISTINCT service_creators.brand_id), NULL) AS tedad,
+	IF(IFNULL(service_creators.id,'') <> '', COUNT(DISTINCT service_creators.id), NULL) AS tedad,
 	IF(IFNULL(service_creators.id,'') <> '', NULL, NULL) AS id,
 	IF(IFNULL(service_creators.id,'') <> '', 'ببرند خدمات', NULL) AS title,
 	IF(IFNULL(service_creators.id,'') <> '', 0, NULL) AS article,
 	IF(IFNULL(service_creators.id,'') <> '', 0, NULL) AS service,
 	IF(IFNULL(service_creators.id,'') <> '', 0, NULL) AS articleBrand,
-	IF(IFNULL(service_creators.id,'') <> '', 1, NULL) AS serviceBrand
+	IF(IFNULL(service_creators.id,'') <> '', 1, NULL) AS serviceBrand,
+	IF(IFNULL(service_creators.id,'') <> '', 0, NULL) AS brand,
+	IF(IFNULL(service_creators.id,'') <> '', 0, NULL) AS reseller
 FROM service_creators
 INNER JOIN service_brands ON service_brands.id = service_creators.brand_id
 WHERE UPPER(service_creators.title) LIKE '%".strtoupper($request->title)."%'
+
+UNION
+
+SELECT
+	IF(IFNULL(article_creators.id,'') <> '', COUNT(DISTINCT article_creators.brand_id), NULL) AS tedad,
+	IF(IFNULL(article_creators.id,'') <> '', NULL, NULL) AS id,
+	IF(IFNULL(article_creators.id,'') <> '', 'برندها', NULL) AS title,
+	IF(IFNULL(article_creators.id,'') <> '', 0, NULL) AS article,
+	IF(IFNULL(article_creators.id,'') <> '', 0, NULL) AS service,
+	IF(IFNULL(article_creators.id,'') <> '', 0, NULL) AS articleBrand,
+	IF(IFNULL(article_creators.id,'') <> '', 0, NULL) AS serviceBrand,
+	IF(IFNULL(article_creators.id,'') <> '', 1, NULL) AS brand,
+	IF(IFNULL(article_creators.id,'') <> '', 0, NULL) AS reseller
+FROM article_creators
+INNER JOIN article_brands ON article_brands.id = article_creators.brand_id
+WHERE UPPER(article_brands.title) LIKE '%".strtoupper($request->title)."%'
+
+UNION
+
+SELECT
+	IF(IFNULL(service_creators.id,'') <> '', COUNT(DISTINCT service_creators.brand_id), NULL) AS tedad,
+	IF(IFNULL(service_creators.id,'') <> '', NULL, NULL) AS id,
+	IF(IFNULL(service_creators.id,'') <> '', 'برندها', NULL) AS title,
+	IF(IFNULL(service_creators.id,'') <> '', 0, NULL) AS article,
+	IF(IFNULL(service_creators.id,'') <> '', 0, NULL) AS service,
+	IF(IFNULL(service_creators.id,'') <> '', 0, NULL) AS articleBrand,
+	IF(IFNULL(service_creators.id,'') <> '', 0, NULL) AS serviceBrand,
+	IF(IFNULL(service_creators.id,'') <> '', 1, NULL) AS brand,
+	IF(IFNULL(service_creators.id,'') <> '', 0, NULL) AS reseller
+FROM service_creators
+INNER JOIN service_brands ON service_brands.id = service_creators.brand_id
+WHERE UPPER(service_brands.title) LIKE '%".strtoupper($request->title)."%'
+
+UNION
+
+SELECT
+	IF(IFNULL(article_creators.area_id,'') <> '', COUNT(DISTINCT article_providers.user_id), NULL) AS tedad,
+	IF(IFNULL(article_creators.area_id,'') <> '', article_creators.area_id, NULL) AS id,
+	IF(IFNULL(article_creators.area_id,'') <> '', article_areas.title, NULL) AS title,
+	IF(IFNULL(article_creators.area_id,'') <> '', 0, NULL) AS article,
+	IF(IFNULL(article_creators.area_id,'') <> '', 0, NULL) AS service,
+	IF(IFNULL(article_creators.area_id,'') <> '', 0, NULL) AS articleBrand,
+	IF(IFNULL(article_creators.area_id,'') <> '', 0, NULL) AS serviceBrand,
+	IF(IFNULL(article_creators.area_id,'') <> '', 0, NULL) AS brand,
+	IF(IFNULL(article_creators.area_id,'') <> '', 1, NULL) AS reseller
+FROM article_providers
+INNER JOIN article_creators ON article_creators.id = article_providers.article_id
+INNER JOIN article_areas ON article_areas.id = article_creators.area_id
+INNER JOIN users ON users.id = article_providers.user_id
+LEFT JOIN locations ON article_providers.user_id = locations.user_id
+WHERE UPPER(users.title_company) LIKE '%".strtoupper($request->title)."%' AND article_providers.active = 1 AND users.active = 1 ".$where."
+GROUP BY article_creators.area_id
+
+UNION
+
+SELECT
+	IF(IFNULL(service_creators.area_id,'') <> '', COUNT(DISTINCT service_providers.user_id), NULL) AS tedad,
+	IF(IFNULL(service_creators.area_id,'') <> '', service_creators.area_id, NULL) AS id,
+	IF(IFNULL(service_creators.area_id,'') <> '', service_areas.title, NULL) AS title,
+	IF(IFNULL(service_creators.area_id,'') <> '', 0, NULL) AS article,
+	IF(IFNULL(service_creators.area_id,'') <> '', 0, NULL) AS service,
+	IF(IFNULL(service_creators.area_id,'') <> '', 0, NULL) AS articleBrand,
+	IF(IFNULL(service_creators.area_id,'') <> '', 0, NULL) AS serviceBrand,
+	IF(IFNULL(service_creators.area_id,'') <> '', 0, NULL) AS brand,
+	IF(IFNULL(service_creators.area_id,'') <> '', 1, NULL) AS reseller
+FROM service_providers
+INNER JOIN service_creators ON service_creators.id = service_providers.service_id
+INNER JOIN service_areas ON service_areas.id = service_creators.area_id
+INNER JOIN users ON users.id = service_providers.user_id
+LEFT JOIN locations ON service_providers.user_id = locations.user_id
+WHERE UPPER(users.title_company) LIKE '%".strtoupper($request->title)."%' AND service_providers.active = 1 AND users.active = 1 ".$where."
+GROUP BY service_creators.area_id
+
 ) AS result
 WHERE result.tedad IS NOT NULL"));
 
@@ -1334,6 +1415,105 @@ WHERE UPPER(article_creators.title) LIKE '%".strtoupper($request->title)."%'"));
 FROM service_brands
 INNER JOIN service_creators ON service_creators.brand_id = service_brands.id
 WHERE UPPER(service_creators.title) LIKE '%".strtoupper($request->title)."%'"));
+
+        $response = [
+            'success' => true,
+            'data' => $data,
+            'message' => 'successfully.'
+        ];
+
+        return response()->json($response, 200);
+    }
+
+    public function searchResultBrand(Request $request){
+        $data = DB::select(DB::raw("SELECT * FROM (
+SELECT
+	service_brands.id AS idBrand,
+	service_brands.title AS titleBrand,
+	service_brands.url_avatar AS avatarBrand,
+	
+	service_creators.id AS id,
+	service_creators.title AS title,
+	service_creators.url_avatar AS avatar
+FROM service_brands
+INNER JOIN service_creators ON service_creators.brand_id = service_brands.id
+WHERE UPPER(service_brands.title) LIKE '%".strtoupper($request->title)."%'
+
+UNION
+
+SELECT
+	article_brands.id AS idBrand,
+	article_brands.title AS titleBrand,
+	article_brands.url_avatar AS avatarBrand,
+	
+	article_creators.id AS id,
+	article_creators.title AS title,
+	article_creators.url_avatar AS avatar
+FROM article_brands
+INNER JOIN article_creators ON article_creators.brand_id = article_brands.id
+WHERE UPPER(article_brands.title) LIKE '%".strtoupper($request->title)."%'
+) AS result
+WHERE result.idBrand IS NOT NULL"));
+
+        $response = [
+            'success' => true,
+            'data' => $data,
+            'message' => 'successfully.'
+        ];
+
+        return response()->json($response, 200);
+    }
+
+    public function searchResultReseller(Request $request){
+        $where = "";
+        if($request->state != null && $request->state != ""){
+            $where = " AND locations.state_id = ".$request->state;
+        }
+        if($request->city != null && $request->city != ""){
+            $where = " AND locations.city_id = ".$request->city;
+        }
+        if($request->district != null && $request->district != "") {
+            $where = " AND locations.district_id = " . $request->district;
+        }
+
+        $data = DB::select(DB::raw("SELECT * FROM (
+SELECT
+	IF(IFNULL(article_creators.id,'') <> '', article_creators.id, NULL) AS id,
+	IF(IFNULL(article_creators.id,'') <> '', article_creators.title, NULL) AS title,
+	IF(IFNULL(article_creators.id,'') <> '', article_creators.url_avatar, NULL) AS avatar,
+	IF(IFNULL(article_creators.id,'') <> '', article_providers.price, NULL) AS price,
+	IF(IFNULL(article_creators.id,'') <> '', article_providers.atless, NULL) AS atless,
+	IF(IFNULL(article_creators.id,'') <> '', article_providers.`status`, NULL) AS darsad,
+	IF(IFNULL(article_creators.id,'') <> '', users.id, NULL) AS idReseller,
+	IF(IFNULL(article_creators.id,'') <> '', users.title_company, NULL) AS titleReseller,
+	IF(IFNULL(article_creators.id,'') <> '', users.url_avatar, NULL) AS avatarReseller
+FROM article_providers
+INNER JOIN article_creators ON article_creators.id = article_providers.article_id
+INNER JOIN users ON users.id = article_providers.user_id
+LEFT JOIN locations ON article_providers.user_id = locations.user_id
+WHERE UPPER(users.title_company) LIKE '%".strtoupper($request->title)."%' AND article_providers.active = 1 AND users.active = 1 ".$where."
+GROUP BY article_providers.id
+
+UNION
+
+SELECT
+	IF(IFNULL(service_creators.id,'') <> '', service_creators.id, NULL) AS id,
+	IF(IFNULL(service_creators.id,'') <> '', service_creators.title, NULL) AS title,
+	IF(IFNULL(service_creators.id,'') <> '', service_creators.url_avatar, NULL) AS avatar,
+	IF(IFNULL(service_creators.id,'') <> '', service_providers.price, NULL) AS price,
+	IF(IFNULL(service_creators.id,'') <> '', service_providers.atless, NULL) AS atless,
+	IF(IFNULL(service_creators.id,'') <> '', service_providers.`status`, NULL) AS darsad,
+	IF(IFNULL(service_creators.id,'') <> '', users.id, NULL) AS idReseller,
+	IF(IFNULL(service_creators.id,'') <> '', users.title_company, NULL) AS titleReseller,
+	IF(IFNULL(service_creators.id,'') <> '', users.url_avatar, NULL) AS avatarReseller
+FROM service_providers
+INNER JOIN service_creators ON service_creators.id = service_providers.service_id
+INNER JOIN users ON users.id = service_providers.user_id
+LEFT JOIN locations ON service_providers.user_id = locations.user_id
+WHERE UPPER(users.title_company) LIKE '%".strtoupper($request->title)."%' AND service_providers.active = 1 AND users.active = 1 ".$where."
+GROUP BY service_providers.id
+) AS result
+WHERE result.id IS NOT NULL"));
 
         $response = [
             'success' => true,
