@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ServiceBrandRequest;
 use App\ServiceBrand;
+use App\ServiceCreator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -153,13 +154,21 @@ class ServiceBrandController extends Controller
         $accessLevel = Auth::user()->usrRole;
         $accessList = json_decode($accessLevel->json, true);
         if($accessList['delete_16'] == "on") {
-            $brand = ServiceBrand::find($request->id);
+            $count = ServiceCreator::where('brand_id', '=', $request->id)->count();
 
-            (new FileController)->delete($brand->url_avatar);
+            if($count == 0){
+                $brand = ServiceBrand::find($request->id);
 
-            $brand->delete();
+                (new FileController)->delete($brand->url_avatar);
 
-            (new LogHistoryController)->logSave(Auth::user()->id, 16, false, false, false, false, true, false);
+                $brand->delete();
+
+                (new LogHistoryController)->logSave(Auth::user()->id, 16, false, false, false, false, true, false);
+
+                return 1;
+            } else {
+                return 0;
+            }
         } else {
             abort(404);
         }

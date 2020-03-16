@@ -79,6 +79,7 @@ $accessList = json_decode($accessLevel->json, true);
                                             <label>برند خدمات</label>
                                             <select class="form-control selectpicker" name="brand" id="brand" data-live-search="true">
                                                 <option value="">انتخاب کنید</option>
+                                                <option value="0">بدون برند</option>
                                                 @foreach($brands as $brand)
                                                     <option value="{{ $brand->id }}">{{ $brand->title }}</option>
                                                 @endforeach
@@ -163,6 +164,7 @@ $accessList = json_decode($accessLevel->json, true);
                                                 <label>برند خدمات</label>
                                                 <select class="form-control selectpicker" name="searchBrand" id="searchBrand" data-live-search="true">
                                                     <option value="">انتخاب کنید</option>
+                                                    <option value="0">بدون برند</option>
                                                     @foreach($brands as $brand)
                                                         <option value="{{ $brand->id }}">{{ $brand->title }}</option>
                                                     @endforeach
@@ -262,7 +264,11 @@ $accessList = json_decode($accessLevel->json, true);
                                                         </div>
                                                     </td>
                                                     <td>{{$serviceCreator->title}}</td>
+                                                    @if($serviceCreator->brand_id != null)
                                                     <td>{{$serviceCreator->brand->title}}</td>
+                                                    @else
+                                                        <td>بدون برند</td>
+                                                    @endif
                                                     <td>{{$serviceCreator->area->title}}</td>
                                                     <td>{{$serviceCreator->group->title}}</td>
                                                     <td>{{$serviceCreator->category->title}}</td>

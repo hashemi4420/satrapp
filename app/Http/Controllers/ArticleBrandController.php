@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\ArticleBrand;
+use App\ArticleCreator;
 use App\Http\Requests\ArticleBrandRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -156,13 +157,22 @@ class ArticleBrandController extends Controller
         $accessLevel = Auth::user()->usrRole;
         $accessList = json_decode($accessLevel->json, true);
         if($accessList['delete_9'] == "on") {
-            $brand = ArticleBrand::find($request->id);
+            $count = ArticleCreator::where('brand_id', '=', $request->id)->count();
 
-            (new FileController)->delete($brand->url_avatar);
+            if($count == 0){
+                $brand = ArticleBrand::find($request->id);
 
-            $brand->delete();
+                (new FileController)->delete($brand->url_avatar);
 
-            (new LogHistoryController)->logSave(Auth::user()->id, 9, false, false, false, false, true, false);
+                $brand->delete();
+
+                (new LogHistoryController)->logSave(Auth::user()->id, 9, false, false, false, false, true, false);
+
+                return 1;
+            } else {
+                return 0;
+            }
+
         } else {
             abort(404);
         }

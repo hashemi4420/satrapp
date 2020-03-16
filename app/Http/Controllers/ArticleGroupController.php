@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\ArticleArea;
+use App\ArticleCategory;
+use App\ArticleCreator;
 use App\ArticleGroup;
 use App\Http\Requests\ArticleGroupRequest;
 use Illuminate\Http\Request;
@@ -161,11 +163,20 @@ class ArticleGroupController extends Controller
         $accessLevel = Auth::user()->usrRole;
         $accessList = json_decode($accessLevel->json, true);
         if($accessList['delete_11'] == "on") {
-            $group = ArticleGroup::find($request->id);
+            $count = ArticleCategory::where('group_id', '=', $request->id)->count();
+            $count = $count + ArticleCreator::where('group_id', '=', $request->id)->count();
 
-            $group->delete();
+            if($count == 0){
+                $group = ArticleGroup::find($request->id);
 
-            (new LogHistoryController)->logSave(Auth::user()->id, 11, true, false, false, false, false, false);
+                $group->delete();
+
+                (new LogHistoryController)->logSave(Auth::user()->id, 11, true, false, false, false, false, false);
+
+                return 1;
+            } else {
+                return 0;
+            }
         } else {
             abort(404);
         }

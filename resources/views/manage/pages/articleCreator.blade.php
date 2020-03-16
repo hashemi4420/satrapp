@@ -69,6 +69,7 @@ $accessList = json_decode($accessLevel->json, true);
                                             <label>برند کالا</label>
                                             <select class="form-control selectpicker" name="brand" id="brand" data-live-search="true">
                                                 <option value="">انتخاب کنید</option>
+                                                <option value="0">بدون برند</option>
                                                 @foreach($brands as $brand)
                                                     <option value="{{ $brand->id }}">{{ $brand->title }}</option>
                                                 @endforeach
@@ -163,6 +164,7 @@ $accessList = json_decode($accessLevel->json, true);
                                                 <label>برند کالا</label>
                                                 <select class="form-control selectpicker" name="searchBrand" id="searchBrand" data-live-search="true">
                                                     <option value="">انتخاب کنید</option>
+                                                    <option value="0">بدون برند</option>
                                                     @foreach($brands as $brand)
                                                         <option value="{{ $brand->id }}">{{ $brand->title }}</option>
                                                     @endforeach
@@ -262,7 +264,11 @@ $accessList = json_decode($accessLevel->json, true);
                                                         </div>
                                                     </td>
                                                     <td>{{$article->title}}</td>
-                                                    <td>{{$article->brand->title}}</td>
+                                                    @if($article->brand_id == null)
+                                                        <td>بدون برند</td>
+                                                    @else
+                                                        <td>{{$article->brand->title}}</td>
+                                                    @endif
                                                     <td>{{$article->area->title}}</td>
                                                     <td>{{$article->group->title}}</td>
                                                     <td>{{$article->category->title}}</td>

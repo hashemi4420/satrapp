@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ServiceGroupRequest;
 use App\ServiceArea;
+use App\ServiceCategory;
+use App\ServiceCreator;
 use App\ServiceGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -160,11 +162,20 @@ class ServiceGroupController extends Controller
         $accessLevel = Auth::user()->usrRole;
         $accessList = json_decode($accessLevel->json, true);
         if($accessList['delete_18'] == "on") {
-            $stateGroup = ServiceGroup::find($request->id);
+            $count = ServiceCategory::where('group_id', '=', $request->id)->count();
+            $count = $count + ServiceCreator::where('group_id', '=', $request->id)->count();
 
-            $stateGroup->delete();
+            if($count == 0){
+                $stateGroup = ServiceGroup::find($request->id);
 
-            (new LogHistoryController)->logSave(Auth::user()->id, 18, false, false, false, false, true, false);
+                $stateGroup->delete();
+
+                (new LogHistoryController)->logSave(Auth::user()->id, 18, false, false, false, false, true, false);
+
+                return 1;
+            } else {
+                return 0;
+            }
         } else {
             abort(404);
         }

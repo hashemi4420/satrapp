@@ -206,12 +206,21 @@ function deleteArticleCreator(id, token) {
                         'id' : id,
                     },
                     success:function (data) {
-                        startDelete.fire(
-                            'تایید',
-                            'فایل به همراه زیر مجموعه آن حذف گردید',
-                            'success'
-                        );
-                        window.location.href = '/manage/createArticle';
+                        if(data == 1){
+                            startDelete.fire(
+                                'تایید',
+                                'فایل به همراه زیر مجموعه آن حذف گردید',
+                                'success'
+                            );
+                            window.location.href = '/manage/createArticle';
+                        }else {
+                            startDelete.fire(
+                                'اخطار',
+                                'این داده دارای زیر مجموعه می باشد، لطفا قبل از حذف آن تکلیف زیر مجموعه آن را مشخص نمایید.',
+                                'warning'
+                            );
+                        }
+                        $(".loader").fadeOut("slow");
                     },
                     error:function (xhr, ajaxOptions, throwError) {
                         startDelete.fire(

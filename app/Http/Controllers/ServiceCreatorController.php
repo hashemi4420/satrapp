@@ -8,6 +8,7 @@ use App\ServiceBrand;
 use App\ServiceCategory;
 use App\ServiceCreator;
 use App\ServiceGroup;
+use App\ServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -87,10 +88,15 @@ class ServiceCreatorController extends Controller
 
 //        date_default_timezone_set("Asia/Tehran");
 
+            $brand = null;
+            if($request->brand != 0){
+                $brand = $request->brand;
+            }
+
             ServiceCreator::create([
                 'title' => trim($request->name),
                 'url_avatar' => trim($destination.'/'.$name),
-                'brand_id' => $request->brand,
+                'brand_id' => $brand,
                 'area_id' => $request->area,
                 'group_id' => $request->group,
                 'category_id' => $request->category,
@@ -150,14 +156,18 @@ class ServiceCreatorController extends Controller
                         INNER JOIN service_areas ON service_areas.id = service_creators.area_id
                         INNER JOIN service_groups ON service_groups.id = service_creators.group_id
                         INNER JOIN service_categories ON service_categories.id = service_creators.category_id
-                        INNER JOIN service_brands ON service_brands.id = service_creators.brand_id
+                        LEFT JOIN service_brands ON service_brands.id = service_creators.brand_id
                         LEFT JOIN users ON users.id = service_creators.user_id
                         WHERE 1 =1';
 
             if (Auth::user()->userRole == 2) {
                 $select .= ' AND service_creators.brand_id = ' . trim(Auth::user()->serviceBrand_id);
             } elseif (trim($request->brand) != "") {
-                $select .= ' AND service_creators.brand_id = ' . trim($request->brand);
+                if($request->brand != 0){
+                    $select .= ' AND service_creators.brand_id = ' . trim($request->brand);
+                }else{
+                    $select .= ' AND ISNULL(service_creators.brand_id) ';
+                }
             }
 
             if(Auth::user()->userRole == 3) {
@@ -188,6 +198,10 @@ class ServiceCreatorController extends Controller
                 $result = "";
 
                 foreach ($services as $service) {
+                    $brand = "بدون برند";
+                    if($service->brand != null){
+                        $brand = $service->brand;
+                    }
                     $result .= '<tr>
                             <td>' . $id++ . '</td>
                             <td><div class="list-unstyled row clearfix aniimated-thumbnials">
@@ -196,10 +210,11 @@ class ServiceCreatorController extends Controller
                                                                 </a>
                                                             </div>
                             <td>' . $service->title . '</td>
-                            <td>' . $service->brand . '</td>
+                            <td>' . $brand . '</td>
                             <td>' . $service->area . '</td>
                             <td>' . $service->groups . '</td>
-                            <td>' . $service->category . '</td>';
+                            <td>' . $service->category . '</td>
+                            <td>' . $service->users . '</td>';
 
                     if (Auth::user()->userRole == 3) {
                         $result .= '<td>' . $service->users . '</td>';
@@ -255,6 +270,11 @@ class ServiceCreatorController extends Controller
         $brands = ServiceBrand::all();
         $brandSelector = "";
         foreach ($brands as $brand){
+            if($serviceCreator->brand_id == null){
+                $brandSelector .= '<option value="0" selected>بدون برند</option>';
+            } else {
+                $brandSelector .= '<option value="0">بدون برند</option>';
+            }
             if($brand->id == $serviceCreator->brand_id)
             {
                 $brandSelector .= '<option value="' . $brand->id . '" selected>' . $brand->title . '</option>';
@@ -313,11 +333,17 @@ class ServiceCreatorController extends Controller
     public function update(Request $request){
         $accessLevel = Auth::user()->usrRole;
         $accessList = json_decode($accessLevel->json, true);
+
+        $brand = null;
+        if($request->brand != 0){
+            $brand = $request->brand;
+        }
+
         if($accessList['update_20'] == "on") {
             $service = ServiceCreator::find($request->id);
 
             $service->title = $request->name;
-            $service->brand_id = $request->brand;
+            $service->brand_id = $brand;
             $service->area_id = $request->area;
             $service->group_id = $request->group;
             $service->category_id = $request->category;
@@ -346,13 +372,21 @@ class ServiceCreatorController extends Controller
         $accessLevel = Auth::user()->usrRole;
         $accessList = json_decode($accessLevel->json, true);
         if($accessList['delete_20'] == "on") {
-            $service = ServiceCreator::find($request->id);
+            $count = ServiceProvider::where('service_id', '=', $request->id)->count();
 
-            (new FileController)->delete($service->url_avatar);
+            if($count == 0){
+                $service = ServiceCreator::find($request->id);
 
-            $service->delete();
+                (new FileController)->delete($service->url_avatar);
 
-            (new LogHistoryController)->logSave(Auth::user()->id, 20, false, false, false, false, true, false);
+                $service->delete();
+
+                (new LogHistoryController)->logSave(Auth::user()->id, 20, false, false, false, false, true, false);
+
+                return 1;
+            } else {
+                return 0;
+            }
         } else {
             abort(404);
         }

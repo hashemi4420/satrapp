@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\City;
+use App\District;
 use App\Http\Requests\StateRequest;
 use App\State;
 use Illuminate\Http\Request;
@@ -130,11 +132,20 @@ class StateController extends Controller
         $accessLevel = Auth::user()->usrRole;
         $accessList = json_decode($accessLevel->json, true);
         if($accessList['delete_6'] == "on") {
-            $state = State::find($request->id);
+            $count = City::where('state_id', '=', $request->id)->count();
+            $count = $count + District::where('state_id', '=', $request->id)->count();
 
-            $state->delete();
+            if($count == 0){
+                $state = State::find($request->id);
 
-            (new LogHistoryController)->logSave(Auth::user()->id, 6, false, false, false, false, true, false);
+                $state->delete();
+
+                (new LogHistoryController)->logSave(Auth::user()->id, 6, false, false, false, false, true, false);
+
+                return 1;
+            } else {
+                return 0;
+            }
         } else {
             abort(404);
         }

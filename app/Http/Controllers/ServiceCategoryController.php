@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ServiceCategoryRequest;
 use App\ServiceArea;
 use App\ServiceCategory;
+use App\ServiceCreator;
 use App\ServiceGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -196,11 +197,19 @@ class ServiceCategoryController extends Controller
         $accessLevel = Auth::user()->usrRole;
         $accessList = json_decode($accessLevel->json, true);
         if($accessList['delete_19'] == "on") {
-            $category = ServiceCategory::find($request->id);
+            $count = ServiceCreator::where('category_id', '=', $request->id)->count();
 
-            $category->delete();
+            if($count == 0){
+                $category = ServiceCategory::find($request->id);
 
-            (new LogHistoryController)->logSave(Auth::user()->id, 19, false, false, false, false, true, false);
+                $category->delete();
+
+                (new LogHistoryController)->logSave(Auth::user()->id, 19, false, false, false, false, true, false);
+
+                return 1;
+            } else {
+                return 0;
+            }
         } else {
             abort(404);
         }

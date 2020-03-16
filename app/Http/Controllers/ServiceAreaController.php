@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ServiceAreaRequest;
 use App\ServiceArea;
+use App\ServiceCategory;
+use App\ServiceCreator;
+use App\ServiceGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -128,11 +131,21 @@ class ServiceAreaController extends Controller
         $accessLevel = Auth::user()->usrRole;
         $accessList = json_decode($accessLevel->json, true);
         if($accessList['delete_17'] == "on") {
-            $stateArea = ServiceArea::find($request->id);
+            $count = ServiceCreator::where('area_id', '=', $request->id)->count();
+            $count = $count + ServiceGroup::where('area_id', '=', $request->id)->count();
+            $count = $count + ServiceCategory::where('area_id', '=', $request->id)->count();
 
-            $stateArea->delete();
+            if($count == 0){
+                $stateArea = ServiceArea::find($request->id);
 
-            (new LogHistoryController)->logSave(Auth::user()->id, 17, false, false, false, false, true, false);
+                $stateArea->delete();
+
+                (new LogHistoryController)->logSave(Auth::user()->id, 17, false, false, false, false, true, false);
+
+                return 1;
+            } else {
+                return 0;
+            }
         } else {
             abort(404);
         }

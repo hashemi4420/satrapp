@@ -7,6 +7,7 @@ use App\ArticleBrand;
 use App\ArticleCategory;
 use App\ArticleCreator;
 use App\ArticleGroup;
+use App\ArticleProvider;
 use App\Http\Requests\ArticleCreatorRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -85,11 +86,15 @@ class ArticleCreatorController extends Controller
             (new FileController)->save($destination, $name, $image);
 
 //        date_default_timezone_set("Asia/Tehran");
+            $brand = null;
+            if($request->brand != 0){
+                $brand = $request->brand;
+            }
 
             ArticleCreator::create([
                 'title' => trim($request->name),
                 'url_avatar' => trim($destination.'/'.$name),
-                'brand_id' => $request->brand,
+                'brand_id' => $brand,
                 'area_id' => $request->area,
                 'group_id' => $request->group,
                 'category_id' => $request->category,
@@ -150,14 +155,18 @@ class ArticleCreatorController extends Controller
                         INNER JOIN article_areas ON article_areas.id = article_creators.area_id
                         INNER JOIN article_groups ON article_groups.id = article_creators.group_id
                         INNER JOIN article_categories ON article_categories.id = article_creators.category_id
-                        INNER JOIN article_brands ON article_brands.id = article_creators.brand_id
+                        LEFT JOIN article_brands ON article_brands.id = article_creators.brand_id
                         LEFT JOIN users ON users.id = article_creators.user_id
                         WHERE 1 =1';
 
             if (Auth::user()->userRole == 2) {
                 $select .= ' AND article_creators.brand_id = ' . trim(Auth::user()->articleBrand_id);
             } elseif (trim($request->brand) != "") {
-                $select .= ' AND article_creators.brand_id = ' . trim($request->brand);
+                if($request->brand != 0){
+                    $select .= ' AND article_creators.brand_id = ' . trim($request->brand);
+                }else{
+                    $select .= ' AND ISNULL(article_creators.brand_id) ';
+                }
             }
 
             if(Auth::user()->userRole == 3) {
@@ -188,6 +197,11 @@ class ArticleCreatorController extends Controller
                 $result = "";
 
                 foreach ($articles as $article) {
+                    $brand = "بدون برند";
+                    if($request->brand != 0){
+                        $brand = $article->brand;
+                    }
+
                     $result .= '<tr>
                             <td>' . $id++ . '</td>
                             <td><div class="list-unstyled row clearfix aniimated-thumbnials">
@@ -196,7 +210,7 @@ class ArticleCreatorController extends Controller
                                                                 </a>
                                                             </div>
                             <td>' . $article->title . '</td>
-                            <td>' . $article->brand . '</td>
+                            <td>' . $brand . '</td>
                             <td>' . $article->area . '</td>
                             <td>' . $article->groups . '</td>
                             <td>' . $article->category . '</td>';
@@ -298,7 +312,12 @@ class ArticleCreatorController extends Controller
             }
         }
 
-        $result = $article->id . "_:_" . $article->title . "_:_" . $article->url_avatar . "_:_" . $article->brand_id
+        $brand = null;
+        if($article->brand_id == null){
+            $brand = $article->brand_id;
+        }
+
+        $result = $article->id . "_:_" . $article->title . "_:_" . $article->url_avatar . "_:_" . $brand
             . "_:_" . $areaSelector . "_:_" . $groupSelector . "_:_" . $categorySelector;
 
         return $result;
@@ -310,8 +329,13 @@ class ArticleCreatorController extends Controller
         if($accessList['update_13'] == "on") {
             $article = ArticleCreator::find($request->id);
 
+            $brand = null;
+            if($request->brand != 0){
+                $brand = $request->brand;
+            }
+
             $article->title = $request->name;
-            $article->brand_id = $request->brand;
+            $article->brand_id = $brand;
             $article->area_id = $request->area;
             $article->group_id = $request->group;
             $article->category_id = $request->category;
@@ -340,13 +364,21 @@ class ArticleCreatorController extends Controller
         $accessLevel = Auth::user()->usrRole;
         $accessList = json_decode($accessLevel->json, true);
         if($accessList['delete_13'] == "on") {
-            $article = ArticleCreator::find($request->id);
+            $count = ArticleProvider::where('article_id', '=', $request->id)->count();
 
-            (new FileController)->delete($article->url_avatar);
+            if($count == 0){
+                $article = ArticleCreator::find($request->id);
 
-            $article->delete();
+                (new FileController)->delete($article->url_avatar);
 
-            (new LogHistoryController)->logSave(Auth::user()->id, 13, false, false, false, false, true, false);
+                $article->delete();
+
+                (new LogHistoryController)->logSave(Auth::user()->id, 13, false, false, false, false, true, false);
+
+                return 1;
+            } else {
+                return 0;
+            }
         } else {
             abort(404);
         }

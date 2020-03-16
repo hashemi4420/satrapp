@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\ArticleArea;
+use App\ArticleCategory;
+use App\ArticleCreator;
+use App\ArticleGroup;
 use App\Http\Requests\ArticleAreaRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -130,11 +133,21 @@ class ArticleAreaController extends Controller
         $accessLevel = Auth::user()->usrRole;
         $accessList = json_decode($accessLevel->json, true);
         if($accessList['read_4'] == "on") {
-            $articleArea = ArticleArea::find($request->id);
+            $count = ArticleCreator::where('area_id', '=', $request->id)->count();
+            $count = $count + ArticleGroup::where('area_id', '=', $request->id)->count();
+            $count = $count + ArticleCategory::where('area_id', '=', $request->id)->count();
 
-            $articleArea->delete();
+            if($count == 0){
+                $articleArea = ArticleArea::find($request->id);
 
-            (new LogHistoryController)->logSave(Auth::user()->id, 10, false, false, false, false, true, false);
+                $articleArea->delete();
+
+                (new LogHistoryController)->logSave(Auth::user()->id, 10, false, false, false, false, true, false);
+
+                return 1;
+            } else {
+                return 0;
+            }
         } else {
             abort(404);
         }
