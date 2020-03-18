@@ -8,7 +8,7 @@ use PhpParser\Node\Expr\AssignOp\Concat;
 class Customer extends Model
 {
     protected $fillable = [
-        'phone', 'name', 'family', 'cash', 'email', 'active', 'state_id', 'city_id', 'district_id'
+        'phone', 'number', 'name', 'family', 'cash', 'email', 'active', 'state_id', 'city_id', 'district_id'
     ];
 
     public function callHistory(){

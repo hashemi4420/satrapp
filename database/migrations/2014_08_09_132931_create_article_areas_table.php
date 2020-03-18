@@ -16,6 +16,7 @@ class CreateArticleAreasTable extends Migration
         Schema::create('article_areas', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('title', 255);
+            $table->string('color', 255);
             $table->bigInteger( 'timestamp')->nullable();
             $table->boolean('active')->default(1);
             $table->enum('accept', ['منتظر تایید', 'تایید شده', 'رد شده'])->default('منتظر تایید');

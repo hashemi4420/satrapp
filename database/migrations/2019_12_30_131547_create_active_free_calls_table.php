@@ -17,7 +17,7 @@ class CreateActiveFreeCallsTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id')->index()->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->bigInteger( 'pay')->nullable();
+            $table->bigInteger( 'pey')->nullable();
             $table->boolean('active')->default(1);
             $table->timestamps();
         });

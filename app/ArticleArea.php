@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ArticleArea extends Model
 {
-    protected $fillable = ['title','timestamp','active','accept'];
+    protected $fillable = ['title','color','timestamp','active','accept'];
 
     public function groups(){
         return $this->hasMany(ArticleGroup::class, 'area_id', 'id');

@@ -207,6 +207,7 @@ class CreateResellerController extends Controller
                 'family' => trim($request['family']),
                 'title_company' => trim($request['company']),
                 'numberFree' => trim($request['numberFree']),
+                'numberPey' => trim($request['phone']),
                 'cash' => trim($request['freeLogo']),
                 'active' => 1,
                 'timestamp' => time(),

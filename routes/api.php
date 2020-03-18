@@ -60,6 +60,9 @@ Route::GET('searchResultServiceBrand', 'api\product@searchResultServiceBrand');
 Route::GET('searchResultBrand', 'api\product@searchResultBrand');
 Route::GET('searchResultReseller', 'api\product@searchResultReseller');
 
+Route::GET('requestSecureCall', 'api\product@requestSecureCall');
+Route::GET('requestFreeCall', 'api\product@requestFreeCall');
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });

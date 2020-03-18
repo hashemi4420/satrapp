@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ServiceArea extends Model
 {
-    protected $fillable = ['title','timestamp','active','accept'];
+    protected $fillable = ['title','color','timestamp','active','accept'];
 
     public function groups()
     {

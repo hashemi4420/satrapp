@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\api;
 
+use App\CallHistory;
 use App\Contact;
 use App\Customer;
 use App\RateCustomerToReseller;
@@ -11,6 +12,7 @@ use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use nusoap_client;
 
 class product extends Controller
 {
@@ -846,8 +848,11 @@ AND users.id = ".$request->userId." AND service_creators.category_id = ".$reques
             $user = Customer::where('phone', '=', trim($request->phone))->get();
 
             if($user->count() == 0){
+                $number = $this->createBusinessNumber();
+
                 $user = Customer::create([
                     'phone' => trim(trim($request->phone)),
+                    'number' => $number,
                     'active' => 1,
                     'state_id' => 8,
                     'cash' => '0',
@@ -1212,7 +1217,7 @@ UNION
 SELECT
 	IF(IFNULL(service_creators.id,'') <> '', COUNT(DISTINCT service_creators.id), NULL) AS tedad,
 	IF(IFNULL(service_creators.id,'') <> '', NULL, NULL) AS id,
-	IF(IFNULL(service_creators.id,'') <> '', 'ببرند خدمات', NULL) AS title,
+	IF(IFNULL(service_creators.id,'') <> '', 'برند خدمات', NULL) AS title,
 	IF(IFNULL(service_creators.id,'') <> '', 0, NULL) AS article,
 	IF(IFNULL(service_creators.id,'') <> '', 0, NULL) AS service,
 	IF(IFNULL(service_creators.id,'') <> '', 0, NULL) AS articleBrand,
@@ -1522,5 +1527,71 @@ WHERE result.id IS NOT NULL"));
         ];
 
         return response()->json($response, 200);
+    }
+
+    public function requestSecureCall(Request $request){
+        include_once(app_path()."/Classes/nusoap/nusoap.php");
+
+        $soap = new nusoap_client("https://portal.avanak.ir/webservice3.asmx?WSDL", 'wsdl');
+
+        $reseller = User::find($request->resellerId);
+        $customer = Customer::find($request->customerId);
+
+        $numberReseller = $reseller->numberPey;
+        $numberCustomer = $customer->phone;
+        $param=array(
+            'userName'=>'09378243134',
+            'password'=>'2211369',
+            'srcNumber'=>substr($numberCustomer,1),
+            'dstNumber'=>substr($numberReseller,1),
+            'serverid'=>1
+        );
+
+        $result = $soap->call('MakeSecureCall', $param);
+
+        CallHistory::create([
+            'user_id' => trim($request->resellerId),
+            'customer_id' => trim($request->customerId),
+            'time' => time(),
+            'type' => 'تماس امن',
+        ]);
+    }
+
+    public function requestFreeCall(Request $request){
+        include_once(app_path()."/Classes/nusoap/nusoap.php");
+
+        $soap = new nusoap_client("https://portal.avanak.ir/webservice3.asmx?WSDL", 'wsdl');
+
+        $reseller = User::find($request->resellerId);
+        $customer = Customer::find($request->customerId);
+
+        $numberReseller = $reseller->numberFree;
+        $numberCustomer = $customer->phone;
+        $param=array(
+            'userName'=>'09378243134',
+            'password'=>'2211369',
+            'srcNumber'=>substr($numberCustomer,1),
+            'dstNumber'=>substr($numberReseller,1),
+            'serverid'=>1
+        );
+
+        $result = $soap->call('MakeSecureCall', $param);
+
+        CallHistory::create([
+            'user_id' => trim($request->resellerId),
+            'customer_id' => trim($request->customerId),
+            'time' => time(),
+            'type' => 'تماس رایگان',
+        ]);
+    }
+
+    protected function createBusinessNumber(){
+        while (1 == 1){
+            $number = '019'.rand(10000000, 99999999);
+            $check = Customer::where('number', '=', $number)->first();
+            if($check === null){
+                return $number;
+            }
+        }
     }
 }
